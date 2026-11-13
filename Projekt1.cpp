@@ -11,7 +11,7 @@ const int Y = 360;    //zB
 //const float D_X_MAP = 25.;
 //const float D_X_MAP = 25.;
 const double d_alpha = 60.0f / X;
-const float H = 35; 
+const float H = 35;
 
 //Startposition und Orientierung des Spielers festlegen
 float S_Pos[2] = { 350.,200. };
@@ -40,14 +40,14 @@ public:
 		h = H * (d / dw);
 	}
 	float get_dw();
-	
+
 
 };
 
 //d korrigieren
 void korrektur(double d, double alpha) {
-		double d_korr = d * cos(alpha);
-	}
+	double d_korr = d * cos(alpha);
+}
 
 //DDA-Algorithmus
 void DDA(float alpha, float DX, float DY) {
@@ -68,8 +68,8 @@ int main() {
 
 
 	int Spielfeld[20][20];
-	for (int i = 0; i < 20;i++) {
-		for (int j = 0; j < 20;j++) {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 20; j++) {
 			if (i == 0 || j == 0 || i == 19 || j == 19) {
 				Spielfeld[i][j] = 1; //Rahmenindex
 			}
@@ -86,8 +86,8 @@ int main() {
 		}
 	}
 
-	
-	
+
+
 	bool running = true;
 	SDL_Event event;
 	Uint64 lastTime = SDL_GetTicks();
@@ -107,10 +107,10 @@ int main() {
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 
-		  
+
 		//Spielkarte Draufsicht erzeugen
-		for (int x = 0; x < 20;x++) {
-			for (int y = 0;y < 20;y++) {
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
 				SDL_FRect rect;
 				rect.x = (x) * 25.0f;   // Spalte * Blockgröße
 				rect.y = (y) * 25.0f;   // Zeile  * Blockgröße
@@ -133,33 +133,33 @@ int main() {
 					SDL_SetRenderDrawColor(renderer, 100, 10, 60, 255);
 
 				}
-			SDL_RenderFillRect(renderer, &rect);
+				SDL_RenderFillRect(renderer, &rect);
 			}
 		}
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		
+
 		//S_Pos[1] += 0.5; // schritt unten
 		//S_Pos[0] += 0.5; // schritt rechts
 		//Player bewegen
 		const bool* keystate = SDL_GetKeyboardState(nullptr);
 
-		if (keystate[SDL_SCANCODE_UP]) { 
+		if (keystate[SDL_SCANCODE_UP]) {
 			float S_Pos_tmp[2] = { S_Pos[0],S_Pos[1] };
-			S_Pos[0] += speed * deltaTime * orientierung[0]; 
+			S_Pos[0] += speed * deltaTime * orientierung[0];
 			S_Pos[1] += speed * deltaTime * orientierung[1];
 			//Wanderkennung und durchgang verbieten
-			if (Spielfeld[int(S_Pos[0] / 25)][int(S_Pos[1]/ 25)] != 0) { //wenn die Position dahingehen würde
+			if (Spielfeld[int(S_Pos[0] / 25)][int(S_Pos[1] / 25)] != 0) { //wenn die Position dahingehen würde
 				S_Pos[0] = S_Pos_tmp[0];
 				S_Pos[1] = S_Pos_tmp[1];
 			}
 
 		}
-		if (keystate[SDL_SCANCODE_DOWN]) { 
+		if (keystate[SDL_SCANCODE_DOWN]) {
 			//if (Spielfeld[int(S_Pos[0] + orientierung[0] / 25)][int(S_Pos[1] + orientierung[1] / 25)] != 0) { //wenn die Position dahingehen würde
 				//speed = 0;
 			//}
 			float S_Pos_tmp[2] = { S_Pos[0],S_Pos[1] };
-			S_Pos[1] -= speed * deltaTime *orientierung[1];
+			S_Pos[1] -= speed * deltaTime * orientierung[1];
 			S_Pos[0] -= speed * deltaTime * orientierung[0];
 			//Wanderkennung und durchgang verbieten
 			if (Spielfeld[int(S_Pos[0] / 25)][int(S_Pos[1] / 25)] != 0) { //wenn die Position dahingehen würde
@@ -172,27 +172,27 @@ int main() {
 		orientierung[0] = cos(winkel_orientierung * pi / 180);
 		orientierung[1] = sin(winkel_orientierung * pi / 180);
 
-		
-		
-		
+
+
+
 		// Player
 		SDL_FRect spieler;
-		spieler.x = S_Pos[0]-4;
-		spieler.y = S_Pos[1]-4;
+		spieler.x = S_Pos[0] - 4;
+		spieler.y = S_Pos[1] - 4;
 		spieler.w = 8.;
 		spieler.h = 8.;
 		SDL_RenderFillRect(renderer, &spieler);
-		
+
 		float alpha_left = winkel_orientierung + 30;
 		float tmp_alpha = alpha_left;
 		float end_x = S_Pos[0] + 150 * orientierung[0];
 		float end_y = S_Pos[1] + 150 * orientierung[1];
 		/*SDL_SetRenderDrawColor(renderer, 255, 130, 67, 255);
-		
+
 		SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
 
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		
+
 		end_x = S_Pos[0] + 150 * cos(alpha_left * pi / 180);
 		end_y = S_Pos[1] + 150 * sin(alpha_left * pi / 180);
 		SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
@@ -208,49 +208,128 @@ int main() {
 
 		float FOV_alpha = 30;
 
-		for (int i = 0;i < X;i++) { //Für zwischenabstände n+1 mal schleife durchführen	
-			float strahlen[2] = { cos(tmp_alpha * pi / 180), sin(tmp_alpha *pi/ 180) };
+		for (int i = 0; i < X; i++) { //Für zwischenabstände n+1 mal schleife durchführen	
+			float strahlen[2] = { cos(tmp_alpha * pi / 180), sin(tmp_alpha * pi / 180) };
 
-			
+			//DDA Algorithmus zur Wanderkennung 
+			float dx = strahlen[0];//Rechtsanteil
+			float dy = strahlen[1];//Untenanteil
+			int mapX = int(S_Pos[0] / 25); //Feld Spieler x-Position
+			int mapY = int(S_Pos[1] / 25); //Feld Spieler y-Position
+			int stepX; //Richung Feldwechsel in x
+			int stepY; //Richtung Feldwechsel in y 
+
+			if (dx < 0) {
+				stepX = -1;
+			}
+			else {
+				stepX = 1;
+			}
+			if (dy < 0) {
+				stepY = -1;
+			}
+			else {
+				stepY = 1;
+			}
+			float deltaDistX = 25 / fabs(dx); //Strahl-Länge zwischen 2 senkrechtenLinien 
+			float deltaDistY = 25 / fabs(dy); //STrahllänge zwischen 2 waagrechten Linien 
+			//25 = Feldgröße in Pixeln 
+			//Bei dx = 0 kein Absturz, float / 0 = inf
+
+			//Abstand zur nächsten Linie:
+			float sideDistX;
+			float sideDistY;
+			if (stepX == 1) { //Strahl nach Rechts -> rechte Kante 
+				sideDistX = ((mapX + 1) * 25 - S_Pos[0]) / fabs(dx);
+			}
+			else { //Strahl nach links -> linke Kante 
+				sideDistX = (S_Pos[0] - mapX * 25) / fabs(dx);
+			}
+			if (stepY == 1) { //Srahl nach unten -> untere Kante
+				sideDistY = ((mapY + 1) * 25 - S_Pos[1]) / fabs(dy);
+			}
+			else { //Strahl nach oben -> obere Kante
+				sideDistY = (S_Pos[1] - mapY * 25) / fabs(dy);
+			}
+
+			//Sprung Schleife zur nächsten Wand
+			bool getroffen = false; //Wanddetektor
+			bool vertikal = false; //Für Schattierung
+			float dist_dda = 0; //Spieler -> Wand Abstand
+
+			while (getroffen == false) { //Wdh bis Wand getroffen 
+				//Welche Wand liegt näher?
+				if (sideDistX < sideDistY) { //Zuerst Senkrechte
+					dist_dda = sideDistX;
+					sideDistX += deltaDistX;
+					mapX += stepX; //Schritt nach rechts/links
+					vertikal = true;
+				}
+				else { //Zuerst Waagrechte
+					dist_dda = sideDistY;
+					sideDistY += deltaDistY;
+					mapY += stepY; //Schritt nach oben/unten 
+					vertikal = false;
+				}
+				if (Spielfeld[mapX][mapY] != 0) { //neues Feld = Wand?
+					getroffen = true;
+				}
+			}
+
+			//Treffpunkt aus DDA-Distanz berechnen:
+			end_x = S_Pos[0] + dist_dda * dx;
+			end_y = S_Pos[1] + dist_dda * dy;
+
 			//naiver algorithmus zur Wand erkennung
-			
-				for (int dt = 1;dt < 500;dt++) {
-					end_x = S_Pos[0] + dt * cos(tmp_alpha * pi / 180);
-					end_y = S_Pos[1] + dt * sin(tmp_alpha * pi / 180);
 
-					//end_x = S_Pos[0] + dt * strahlen[0];
-					//end_y = S_Pos[1] + dt * strahlen[1];
-					if (Spielfeld[int(end_x / 25)][int(end_y / 25)] != 0) { // Wand gefunden
-						if (count % 16 == 0) {//jeden 16. Strahl zeichnen
-							SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-							SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
-						}
-						break;
-					}
-					
-				}
-				float d_w = sqrt(pow(end_x - S_Pos[0], 2) + pow(end_y - S_Pos[1], 2));
-				float d_korr = d_w * cos(FOV_alpha * pi / 180);
-				int h_w = int(H * d / d_korr);
-				int oben_unten = (Y - h_w) / 2; //Höhe für Boden oder Wand
+		   /*for (int dt = 1; dt < 500; dt++) {
+			   end_x = S_Pos[0] + dt * cos(tmp_alpha * pi / 180);
+			   end_y = S_Pos[1] + dt * sin(tmp_alpha * pi / 180);
 
-				for (int j = 0; j <Y; j++) {
-					if(j<oben_unten)
-					{
-						SDL_SetRenderDrawColor(renderer, 10, 0, 250, 200);
-						SDL_RenderPoint(renderer, X-i+Projektion_versch_x, j+ Projektion_versch_y);
-					}
-					if(j>=oben_unten&&j<oben_unten+h_w)
-					{
-						SDL_SetRenderDrawColor(renderer, 160, 40, 80, 200);
-						SDL_RenderPoint(renderer, X-i + Projektion_versch_x, j + Projektion_versch_y);
-					}
-					if(j>=oben_unten+h_w&&j<oben_unten*2+h_w)
-					{
-						SDL_SetRenderDrawColor(renderer, 50, 40, 50, 200);
-						SDL_RenderPoint(renderer, X-i + Projektion_versch_x, j + Projektion_versch_y);
-					}
+			   //end_x = S_Pos[0] + dt * strahlen[0];
+			   //end_y = S_Pos[1] + dt * strahlen[1];
+			   if (Spielfeld[int(end_x / 25)][int(end_y / 25)] != 0) { // Wand gefunden */
+			if (count % 16 == 0) {//jeden 16. Strahl zeichnen
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+				SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
+			}
+			/*break;
+		}
+
+	}
+
+	float d_w = sqrt(pow(end_x - S_Pos[0], 2) + pow(end_y - S_Pos[1], 2));
+	if (i == 320) {
+		cout << "naiv: " << d_w << " DDA: " << dist_dda << endl;
+	}*/
+			float d_korr = dist_dda * cos(FOV_alpha * pi / 180);
+			int h_w = int(H * d / d_korr);
+			int oben_unten = (Y - h_w) / 2; //Höhe für Boden oder Wand
+
+			for (int j = 0; j < Y; j++) {
+				if (j < oben_unten)
+				{
+					SDL_SetRenderDrawColor(renderer, 10, 0, 250, 200);
+					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
 				}
+				if (j >= oben_unten && j < oben_unten + h_w)
+				{
+
+					if (vertikal == true) {
+						SDL_SetRenderDrawColor(renderer, 160, 40, 80, 255);//helle Seite
+					}
+					else {
+						SDL_SetRenderDrawColor(renderer, 100, 25, 50, 255);//dunkle Seite
+					}
+					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
+
+				}
+				if (j >= oben_unten + h_w && j < oben_unten * 2 + h_w)
+				{
+					SDL_SetRenderDrawColor(renderer, 50, 40, 50, 200);
+					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
+				}
+			}
 
 
 
@@ -264,11 +343,11 @@ int main() {
 			//SDL_SetRenderDrawColor(renderer, 255, 130, 67, 255);
 			//SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
 		}
-		
+
 
 
 		SDL_RenderPresent(renderer);
-		SDL_Delay(1000/24);
+		SDL_Delay(1000 / 24);
 	}
 	SDL_schliessen(window, renderer);
 
