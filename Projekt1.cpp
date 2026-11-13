@@ -28,7 +28,12 @@ const int Projektion_versch_y = 180;
 int init_SDL(SDL_Window*& window, SDL_Renderer*& renderer);
 void SDL_schliessen(SDL_Window*& window, SDL_Renderer*& renderer);
 
-class Wand {
+struct wand {
+	int farbe;
+
+};
+
+/*class Wand {
 private:
 	//float d; //distanz vom Spieler zur Projektionsebene 
 	float dw; //distanz vom Spieler zur Wand
@@ -42,7 +47,7 @@ public:
 	float get_dw();
 
 
-};
+};*/
 
 //d korrigieren
 void korrektur(double d, double alpha) {
@@ -50,14 +55,14 @@ void korrektur(double d, double alpha) {
 }
 
 //DDA-Algorithmus
-void DDA(float alpha, float DX, float DY) {
+/*void DDA(float alpha, float DX, float DY) {
 	float dx = cos(alpha);
 	float dy = sin(alpha);
 	float e_vec[2] = { dx, dy };
 	float SideDistX = DX / dx;
 	float SideDistY = DY / dy;
 
-}
+}*/
 
 int main() {
 
@@ -85,6 +90,18 @@ int main() {
 			}
 		}
 	}
+	//struct array anlegen
+
+	wand waende[4];
+	waende[0].farbe = 0;
+	waende[1].farbe = 1;
+	waende[2].farbe = 2;
+	waende[3].farbe = 3;
+
+	//Farben anlegen
+	SDL_Color farben[4] = { { 70,80,140,255 },{ 133,139,137,255 },{ 170,140,20,255 },{ 120,190,190,255 } };
+
+
 
 
 
@@ -218,6 +235,7 @@ int main() {
 			int mapY = int(S_Pos[1] / 25); //Feld Spieler y-Position
 			int stepX; //Richung Feldwechsel in x
 			int stepY; //Richtung Feldwechsel in y 
+			int wandtyp;
 
 			if (dx < 0) {
 				stepX = -1;
@@ -273,6 +291,7 @@ int main() {
 				}
 				if (Spielfeld[mapX][mapY] != 0) { //neues Feld = Wand?
 					getroffen = true;
+					wandtyp = Spielfeld[mapX][mapY];
 				}
 			}
 
@@ -309,17 +328,21 @@ int main() {
 			for (int j = 0; j < Y; j++) {
 				if (j < oben_unten)
 				{
-					SDL_SetRenderDrawColor(renderer, 10, 0, 250, 200);
+
+					SDL_SetRenderDrawColor(renderer, farben[0].r, farben[0].g, farben[0].b, farben[0].a);
 					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
 				}
 				if (j >= oben_unten && j < oben_unten + h_w)
 				{
+					SDL_Color c;
+					
+					c = farben[waende[wandtyp].farbe]; //farbnummer ist im structarray hinterlegt und bestimmt SDL_farbarray
 
 					if (vertikal == true) {
-						SDL_SetRenderDrawColor(renderer, 160, 40, 80, 255);//helle Seite
+						SDL_SetRenderDrawColor(renderer, c.r,c.g,c.b,c.a);//helle Seite
 					}
 					else {
-						SDL_SetRenderDrawColor(renderer, 100, 25, 50, 255);//dunkle Seite
+						SDL_SetRenderDrawColor(renderer, c.r*3/5, c.g * 3 / 5, c.b * 3 / 5, c.a * 3 / 5);//dunkle Seite
 					}
 					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
 
