@@ -101,9 +101,8 @@ int main() {
 	//Farben anlegen
 	SDL_Color farben[4] = { { 70,80,140,255 },{ 133,139,137,255 },{ 170,140,20,255 },{ 120,190,190,255 } };
 
-
-
-
+	//Textur laden 
+	SDL_Surface* textur = SDL_LoadBMP("Texturen/wall1.bmp");
 
 	bool running = true;
 	SDL_Event event;
@@ -299,6 +298,16 @@ int main() {
 			end_x = S_Pos[0] + dist_dda * dx;
 			end_y = S_Pos[1] + dist_dda * dy;
 
+			float Treffer_im_Feld;
+			if (vertikal == true) {
+				Treffer_im_Feld = fmod(end_y, 25); //senkrechte Wand 
+			}
+			else {
+				Treffer_im_Feld = fmod(end_x, 25); //waagrechte Wand 
+			}
+
+			//passende Spalte im Texturbild
+			int  texX = int(Treffer_im_Feld / 25 * textur->w);
 			//naiver algorithmus zur Wand erkennung
 
 		   /*for (int dt = 1; dt < 500; dt++) {
@@ -334,8 +343,8 @@ int main() {
 				}
 				if (j >= oben_unten && j < oben_unten + h_w)
 				{
+					/* ALTE VERSION: Einfarbige Wand
 					SDL_Color c;
-					
 					c = farben[waende[wandtyp].farbe]; //farbnummer ist im structarray hinterlegt und bestimmt SDL_farbarray
 
 					if (vertikal == true) {
@@ -344,8 +353,22 @@ int main() {
 					else {
 						SDL_SetRenderDrawColor(renderer, c.r*3/5, c.g * 3 / 5, c.b * 3 / 5, c.a * 3 / 5);//dunkle Seite
 					}
-					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
+					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);*/
 
+					//Zeilen für Texturen 
+					int texY = (j - oben_unten) * textur->h / h_w;
+
+					Uint8 r, g, b, a;
+					SDL_ReadSurfacePixel(textur, texX, texY, &r, &g, &b, &a);
+
+					//Schattenseite abdunkeln
+					if (vertikal == false) {
+						r = r * 3 / 5;
+						g = g * 3 / 5;
+						b = b * 3 / 5;
+					}
+					SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
 				}
 				if (j >= oben_unten + h_w && j < oben_unten * 2 + h_w)
 				{
@@ -372,6 +395,7 @@ int main() {
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000 / 24);
 	}
+	SDL_DestroySurface(textur); //Speicher der Textur freigeben 
 	SDL_schliessen(window, renderer);
 
 	return 0;
