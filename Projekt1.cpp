@@ -30,6 +30,7 @@ void SDL_schliessen(SDL_Window*& window, SDL_Renderer*& renderer);
 
 struct wand {
 	int farbe;
+	SDL_Surface* textur;
 
 };
 
@@ -101,8 +102,14 @@ int main() {
 	//Farben anlegen
 	SDL_Color farben[4] = { { 70,80,140,255 },{ 133,139,137,255 },{ 170,140,20,255 },{ 120,190,190,255 } };
 
-	//Textur laden 
-	SDL_Surface* textur = SDL_LoadBMP("Texturen/wall1.bmp");
+	//Texturen laden 
+	SDL_Surface* textur1 = SDL_LoadBMP("Texturen/wall1.bmp");
+	SDL_Surface* textur2 = SDL_LoadBMP("Texturen/wall2.bmp");
+
+	waende[0].textur = nullptr;
+	waende[1].textur = textur1;
+	waende[2].textur = textur2;
+	waende[3].textur = textur2;
 
 	bool running = true;
 	SDL_Event event;
@@ -307,7 +314,9 @@ int main() {
 			}
 
 			//passende Spalte im Texturbild
-			int  texX = int(Treffer_im_Feld / 25 * textur->w);
+			SDL_Surface* tex = waende[wandtyp].textur;
+
+			int  texX = int(Treffer_im_Feld / 25 * tex->w);
 			//naiver algorithmus zur Wand erkennung
 
 		   /*for (int dt = 1; dt < 500; dt++) {
@@ -356,10 +365,10 @@ int main() {
 					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);*/
 
 					//Zeilen für Texturen 
-					int texY = (j - oben_unten) * textur->h / h_w;
+					int texY = (j - oben_unten) * tex->h / h_w;
 
 					Uint8 r, g, b, a;
-					SDL_ReadSurfacePixel(textur, texX, texY, &r, &g, &b, &a);
+					SDL_ReadSurfacePixel(tex, texX, texY, &r, &g, &b, &a);
 
 					//Schattenseite abdunkeln
 					if (vertikal == false) {
@@ -395,7 +404,10 @@ int main() {
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000 / 24);
 	}
-	SDL_DestroySurface(textur); //Speicher der Textur freigeben 
+	
+	//Speicher der Textur freigeben 
+	SDL_DestroySurface(textur1);
+	SDL_DestroySurface(textur2);
 	SDL_schliessen(window, renderer);
 
 	return 0;
