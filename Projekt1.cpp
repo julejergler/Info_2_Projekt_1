@@ -52,7 +52,34 @@ int main() {
 			else if ((i >= 10 && i < 17) && (j >= 4 && j < 6)) {
 				Spielfeld[i][j] = 3;
 			}
-
+			//L-Wand oben links
+			else if ((i >= 2 && i < 7) && (j == 2)) {           //waagerechtes Stück
+				Spielfeld[i][j] = 2;
+			}
+			else if ((i == 2) && (j >= 3 && j < 8)) {           //senkrechtes Stück
+				Spielfeld[i][j] = 2;
+			}
+			//L-Wand rechts
+			else if ((i == 17) && (j >= 8 && j < 15)) {         //senkrechtes Stück
+				Spielfeld[i][j] = 2;
+			}
+			else if ((i >= 13 && i < 17) && (j == 14)) {        //waagerechtes Stück
+				Spielfeld[i][j] = 2;
+			}
+			//L-Wand unten Mitte
+			else if ((i == 8) && (j >= 13 && j < 18)) {         //senkrechtes Stück
+				Spielfeld[i][j] = 3;
+			}
+			else if ((i >= 9 && i < 13) && (j == 17)) {         //waagerechtes Stück
+				Spielfeld[i][j] = 3;
+			}
+			//Kreuz in der Mitte
+			else if ((i >= 6 && i < 13) && (j == 9)) {          //Querbalken
+				Spielfeld[i][j] = 3;
+			}
+			else if ((i == 9) && (j >= 7 && j < 12)) {          //Längsbalken
+				Spielfeld[i][j] = 3;
+			}
 			else {
 				Spielfeld[i][j] = 0;
 			}
@@ -313,7 +340,7 @@ int main() {
 
 
 		SDL_RenderPresent(renderer);
-		SDL_Delay(1000 / 24);
+		SDL_Delay(1000 / 100);
 	}
 	
 	//Speicher der Textur freigeben 
