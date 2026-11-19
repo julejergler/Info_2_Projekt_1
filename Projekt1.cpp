@@ -8,8 +8,6 @@ const double pi = acos(-1.0); //gibt genau pi
 const double FOV = pi / 3;  //zB
 const int X = 640;    //zB für BILDSCHIRMBREITE projektion
 const int Y = 360;    //zB
-//const float D_X_MAP = 25.;
-//const float D_X_MAP = 25.;
 const double d_alpha = 60.0f / X;
 const float H = 35;
 
@@ -34,44 +32,13 @@ struct wand {
 
 };
 
-/*class Wand {
-private:
-	//float d; //distanz vom Spieler zur Projektionsebene 
-	float dw; //distanz vom Spieler zur Wand
-	float H; //Höhe der Wand
-	float h; //Projektionshöhe
-	bool vertikal; //Schnittpunkt für Schatten, wenn fals, dann horizontal
-public:
-	void berechne_h() {
-		h = H * (d / dw);
-	}
-	float get_dw();
-
-
-};*/
-
-//d korrigieren
-void korrektur(double d, double alpha) {
-	double d_korr = d * cos(alpha);
-}
-
-//DDA-Algorithmus
-/*void DDA(float alpha, float DX, float DY) {
-	float dx = cos(alpha);
-	float dy = sin(alpha);
-	float e_vec[2] = { dx, dy };
-	float SideDistX = DX / dx;
-	float SideDistY = DY / dy;
-
-}*/
 
 int main() {
 
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
 
-	init_SDL(window, renderer);
-
+	if (init_SDL(window, renderer) != 0) { return -1;  }
 
 	int Spielfeld[20][20];
 	for (int i = 0; i < 20; i++) {
@@ -154,16 +121,13 @@ int main() {
 					break;
 				case 3:
 					SDL_SetRenderDrawColor(renderer, 100, 10, 60, 255);
-
+					break;
 				}
 				SDL_RenderFillRect(renderer, &rect);
 			}
 		}
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-		//S_Pos[1] += 0.5; // schritt unten
-		//S_Pos[0] += 0.5; // schritt rechts
-		//Player bewegen
 		const bool* keystate = SDL_GetKeyboardState(nullptr);
 
 		if (keystate[SDL_SCANCODE_UP]) {
@@ -178,12 +142,10 @@ int main() {
 
 		}
 		if (keystate[SDL_SCANCODE_DOWN]) {
-			//if (Spielfeld[int(S_Pos[0] + orientierung[0] / 25)][int(S_Pos[1] + orientierung[1] / 25)] != 0) { //wenn die Position dahingehen würde
-				//speed = 0;
-			//}
 			float S_Pos_tmp[2] = { S_Pos[0],S_Pos[1] };
 			S_Pos[1] -= speed * deltaTime * orientierung[1];
 			S_Pos[0] -= speed * deltaTime * orientierung[0];
+			
 			//Wanderkennung und durchgang verbieten
 			if (Spielfeld[int(S_Pos[0] / 25)][int(S_Pos[1] / 25)] != 0) { //wenn die Position dahingehen würde
 				S_Pos[0] = S_Pos_tmp[0];
@@ -194,9 +156,6 @@ int main() {
 		if (keystate[SDL_SCANCODE_RIGHT]) { winkel_orientierung += speed * deltaTime; }
 		orientierung[0] = cos(winkel_orientierung * pi / 180);
 		orientierung[1] = sin(winkel_orientierung * pi / 180);
-
-
-
 
 		// Player
 		SDL_FRect spieler;
@@ -210,28 +169,12 @@ int main() {
 		float tmp_alpha = alpha_left;
 		float end_x = S_Pos[0] + 150 * orientierung[0];
 		float end_y = S_Pos[1] + 150 * orientierung[1];
-		/*SDL_SetRenderDrawColor(renderer, 255, 130, 67, 255);
 
-		SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
-
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-
-		end_x = S_Pos[0] + 150 * cos(alpha_left * pi / 180);
-		end_y = S_Pos[1] + 150 * sin(alpha_left * pi / 180);
-		SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
-
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-		float alpha_right = winkel_orientierung - 30;
-		end_x = S_Pos[0] + 150 * cos(alpha_right * pi / 180);
-		end_y = S_Pos[1] + 150 * sin(alpha_right * pi / 180);
-		SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);*/
-
-		//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		int count = 0; //count, um nur alle n Strahlen, nur einen zu erzeugen
 
 		float FOV_alpha = 30;
 
-		for (int i = 0; i < X; i++) { //Für zwischenabstände n+1 mal schleife durchführen	
+		for (int i = 0; i < X; i++) { //Für jede Bildschrimspalte ein Strahl	
 			float strahlen[2] = { cos(tmp_alpha * pi / 180), sin(tmp_alpha * pi / 180) };
 
 			//DDA Algorithmus zur Wanderkennung 
@@ -317,28 +260,12 @@ int main() {
 			SDL_Surface* tex = waende[wandtyp].textur;
 
 			int  texX = int(Treffer_im_Feld / 25 * tex->w);
-			//naiver algorithmus zur Wand erkennung
-
-		   /*for (int dt = 1; dt < 500; dt++) {
-			   end_x = S_Pos[0] + dt * cos(tmp_alpha * pi / 180);
-			   end_y = S_Pos[1] + dt * sin(tmp_alpha * pi / 180);
-
-			   //end_x = S_Pos[0] + dt * strahlen[0];
-			   //end_y = S_Pos[1] + dt * strahlen[1];
-			   if (Spielfeld[int(end_x / 25)][int(end_y / 25)] != 0) { // Wand gefunden */
+			
 			if (count % 16 == 0) {//jeden 16. Strahl zeichnen
 				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 				SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
 			}
-			/*break;
-		}
-
-	}
-
-	float d_w = sqrt(pow(end_x - S_Pos[0], 2) + pow(end_y - S_Pos[1], 2));
-	if (i == 320) {
-		cout << "naiv: " << d_w << " DDA: " << dist_dda << endl;
-	}*/
+			
 			float d_korr = dist_dda * cos(FOV_alpha * pi / 180);
 			int h_w = int(H * d / d_korr);
 			int oben_unten = (Y - h_w) / 2; //Höhe für Boden oder Wand
@@ -352,17 +279,6 @@ int main() {
 				}
 				if (j >= oben_unten && j < oben_unten + h_w)
 				{
-					/* ALTE VERSION: Einfarbige Wand
-					SDL_Color c;
-					c = farben[waende[wandtyp].farbe]; //farbnummer ist im structarray hinterlegt und bestimmt SDL_farbarray
-
-					if (vertikal == true) {
-						SDL_SetRenderDrawColor(renderer, c.r,c.g,c.b,c.a);//helle Seite
-					}
-					else {
-						SDL_SetRenderDrawColor(renderer, c.r*3/5, c.g * 3 / 5, c.b * 3 / 5, c.a * 3 / 5);//dunkle Seite
-					}
-					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);*/
 
 					//Zeilen für Texturen 
 					int texY = (j - oben_unten) * tex->h / h_w;
@@ -391,12 +307,7 @@ int main() {
 
 			count++;
 			FOV_alpha -= d_alpha;
-			//DDA
-			//end_x = S_Pos[0] + 150 * strahlen[0];
-			//end_y = S_Pos[1] + 150 * strahlen[1];
 			tmp_alpha -= d_alpha;
-			//SDL_SetRenderDrawColor(renderer, 255, 130, 67, 255);
-			//SDL_RenderLine(renderer, S_Pos[0], S_Pos[1], end_x, end_y);
 		}
 
 
@@ -441,12 +352,26 @@ int init_SDL(SDL_Window*& window, SDL_Renderer*& renderer) {  //es wird die Refe
 	if (renderer == nullptr) {
 		cout << "ERROR: couldn't open renderer\n";
 		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
+		return -1;
 	}
+	return 0;
 }
 void SDL_schliessen(SDL_Window*& window, SDL_Renderer*& renderer) {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
+
+/*
+Projektarbeit 1 - Raycasting 
+
+Gruppe: 
+Jannis Debatin
+Jule Jergler
+
+Wir stimmen der Veröffentlichung unseres Source Codes in anonymisierter Form zu
+
+Copyright (C) 2026 Debatin, Jergler
+SPDX-License-Identifier: MIT
+*/
