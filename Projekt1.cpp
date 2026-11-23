@@ -106,6 +106,29 @@ int main() {
 	waende[2].textur = textur2;
 	waende[3].textur = textur3;
 
+	//=========
+	// ADD-ON MUSIC
+	//=========
+	SDL_AudioSpec musik_spec;          //Format der WAV-Datei (wird von SDL_LoadWAV gefüllt)
+	Uint8* musik_daten = nullptr;      //Zeiger auf die Tondaten
+	Uint32 musik_laenge = 0;           //Länge der Tondaten in Bytes
+
+	if (!SDL_LoadWAV("TexasMusic/hintergrundmusik.wav", &musik_spec, &musik_daten, &musik_laenge)) {
+		cout << "Musik konnte nicht geladen werden: " << SDL_GetError() << "\n";
+	}
+
+	//Audio-Stream zum Standard-Lautsprecher öffnen
+	SDL_AudioStream* musik_stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &musik_spec, nullptr, nullptr);
+	if (musik_stream == nullptr) {
+		cout << "Audio-Stream konnte nicht geoeffnet werden: " << SDL_GetError() << "\n";
+	}
+	else {
+		SDL_SetAudioStreamGain(musik_stream, 0.3f);                          //Lautstärke 30 %
+		SDL_PutAudioStreamData(musik_stream, musik_daten, musik_laenge);     //Musik in Warteschlange legen
+		SDL_ResumeAudioStreamDevice(musik_stream);                           //Wiedergabe starten
+	}
+	//=========
+
 	bool running = true;
 	SDL_Event event;
 	Uint64 lastTime = SDL_GetTicks();
@@ -115,6 +138,17 @@ int main() {
 		Uint64 currentTime = SDL_GetTicks();
 		float deltaTime = (currentTime - lastTime) / 1000.0f;
 		lastTime = currentTime;
+
+		//=========
+		// ADD-ON MUSIC
+		//=========
+		//Musik endlos wiederholen: wenn weniger als eine Runde in der Warteschlange ist, nachlegen
+		if (musik_stream != nullptr && musik_daten != nullptr) {
+			if (SDL_GetAudioStreamQueued(musik_stream) < (int)musik_laenge) {
+				SDL_PutAudioStreamData(musik_stream, musik_daten, musik_laenge);
+			}
+		}
+		//=========
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_EVENT_QUIT) {  //wenn fenster geschlossen wird...
@@ -352,6 +386,11 @@ int main() {
 	SDL_DestroySurface(textur1);
 	SDL_DestroySurface(textur2);
 	SDL_DestroySurface(textur3);
+
+	//Musik freigeben
+	SDL_DestroyAudioStream(musik_stream);
+	SDL_free(musik_daten);
+
 	SDL_schliessen(window, renderer);
 
 	return 0;
@@ -361,8 +400,8 @@ int main() {
 
 int init_SDL(SDL_Window*& window, SDL_Renderer*& renderer) {  //es wird die Referenz des Zeigers auf den struct übergeben
 	// 1) Initialisierung
-	if (SDL_Init(SDL_INIT_VIDEO)) {
-		cout << "window initialization is succesful.\n";
+	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO)) {
+		cout << "window an audio initialization is succesful.\n";
 	}
 	else {
 		cout << SDL_GetError();
