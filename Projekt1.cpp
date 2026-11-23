@@ -99,11 +99,12 @@ int main() {
 	//Texturen laden 
 	SDL_Surface* textur1 = SDL_LoadBMP("Texturen/wall1.bmp");
 	SDL_Surface* textur2 = SDL_LoadBMP("Texturen/wall2.bmp");
+	SDL_Surface* textur3 = SDL_LoadBMP("Texturen/dont_mess_with_texas.bmp");
 
 	waende[0].textur = nullptr;
 	waende[1].textur = textur1;
 	waende[2].textur = textur2;
-	waende[3].textur = textur2;
+	waende[3].textur = textur3;
 
 	bool running = true;
 	SDL_Event event;
@@ -304,12 +305,16 @@ int main() {
 					SDL_SetRenderDrawColor(renderer, farben[0].r, farben[0].g, farben[0].b, farben[0].a);
 					SDL_RenderPoint(renderer, X - i + Projektion_versch_x, j + Projektion_versch_y);
 				}
+
+				//Texturprojektion. Variante b) aus Skript umgesetzt. Für jedes Bildschirmpixel wird das passende Pixel aus der Textur ausgelesen (äquidistant gesampelt)
 				if (j >= oben_unten && j < oben_unten + h_w)
 				{
 
 					//Zeilen für Texturen 
 					int texY = (j - oben_unten) * tex->h / h_w;
-
+					//j-oben_unten ==> wieviele Pixel das aktuelle Pixel unter der Oberkante der Wand liegt (oben=0; unten=h_w-1)
+					// (j-oben_unten)/h_w = proportion Lage des pixels zur wandhöhe
+					// *tex->h ==> Diesen Anteil auf Texturhöhe übertragen
 					Uint8 r, g, b, a;
 					SDL_ReadSurfacePixel(tex, texX, texY, &r, &g, &b, &a);
 
@@ -346,6 +351,7 @@ int main() {
 	//Speicher der Textur freigeben 
 	SDL_DestroySurface(textur1);
 	SDL_DestroySurface(textur2);
+	SDL_DestroySurface(textur3);
 	SDL_schliessen(window, renderer);
 
 	return 0;
